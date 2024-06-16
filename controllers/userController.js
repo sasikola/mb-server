@@ -1,6 +1,7 @@
 const Blog = require("../models/Blog");
 const User = require("../models/User");
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
+const fs = require("fs");
 
 const createBlog = async (req, res) => {
   try {
@@ -229,7 +230,9 @@ const updateUser = async (req, res) => {
     user.password = hashedPassword;
 
     await user.save();
-    res.status(200).json({ message: "User details updated successfully" });
+    res
+      .status(200)
+      .json({ message: "User details updated successfully", user: user });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
   }
