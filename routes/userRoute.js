@@ -51,7 +51,12 @@ router.post(
 router.get("/blogs", verifyToken, getAllBlogs);
 router.get("/blog/:id", verifyToken, getSingleBlog);
 router.delete("/blog/delete/:id", verifyToken, deleteBlog);
-router.put("/blog/update/:id", verifyToken, updateBlog);
+router.put(
+  "/blog/update/:id",
+  blogUpload.array("images", 10),
+  verifyToken,
+  updateBlog
+);
 
 // User Routes
 router.get("/profile/:id", verifyToken, getUser);

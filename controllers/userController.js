@@ -67,7 +67,6 @@ const createBlog = async (req, res) => {
   }
 };
 
-
 // to fetch all blogs
 const getAllBlogs = async (req, res) => {
   try {
@@ -114,27 +113,62 @@ const getSingleBlog = async (req, res) => {
 const updateBlog = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, author } = req.body;
+    const { title, description, category } = req.body;
     const imagePaths = req.files?.map((file) => file.path);
+    // validation
+    if (!title || !description || !category || !imagePaths) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Check image size
+    const imageSizes = imagePaths.map((path) => fs.statSync(path).size);
+    if (imageSizes.some((size) => size > 1000000)) {
+      return res
+        .status(400)
+        .json({ message: "Image size should be less than 1MB" });
+    }
+
+    // Check number of images
+    if (imagePaths.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "At least one image is required" });
+    }
+    if (imagePaths.length > 5) {
+      return res.status(400).json({ message: "Only 5 images are allowed" });
+    }
+
     const blog = await Blog.findById(id);
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
     }
+    // delete the old images
+    if (blog.images.length > 0) {
+      blog.images.forEach((image) => {
+        fs.unlink(image, (err) => {
+          if (err) {
+            console.error(err);
+          }
+        });
+      });
+    }
+    // add new images
+    if (imagePaths?.length > 0) {
+      imagePaths.forEach((image) => {
+        blog.images.push(image);
+      });
+    }
     if (title) {
       blog.title = title;
     }
-    if (content) {
-      blog.content = content;
+    if (description) {
+      blog.description = description;
     }
-    if (author) {
-      blog.author = author;
-    }
-    if (imagePaths?.length > 0) {
-      blog.images = imagePaths;
+    if (category) {
+      blog.category = category;
     }
     await blog.save();
     res.status(200).json({ message: "Blog updated successfully" });
-    console.log(blog);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
