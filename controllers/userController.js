@@ -205,7 +205,35 @@ const updateBlog = async (req, res) => {
   }
 };
 
-//
+//to the posts by category
+
+const getPostsByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+    const blogs = await Blog.find({ category }).sort({ createdAt: -1 });
+    res.status(200).json(blogs);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// to get user posts
+
+const getUserPosts = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const blogs = await Blog.find({ author: id }).sort({ createdAt: -1 });
+    res.status(200).json(blogs);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 // ---------------USER ROUTES------------------//
 
@@ -334,4 +362,6 @@ module.exports = {
   getAllAuthors,
   changeProfilePicture,
   updateUser,
+  getPostsByCategory,
+  getUserPosts
 };

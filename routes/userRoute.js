@@ -11,6 +11,8 @@ const {
   getUser,
   getAllAuthors,
   changeProfilePicture,
+  getPostsByCategory,
+  getUserPosts,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -51,6 +53,8 @@ router.get("/blogs", getAllBlogs);
 router.get("/blog/:id", getSingleBlog);
 router.delete("/blog/delete/:id", verifyToken, deleteBlog);
 router.put("/blog/update/:id", verifyToken, updateBlog);
+router.get("/blog/categories/:category", getPostsByCategory)
+router.get("/blog/user/:id", getUserPosts)
 
 // User Routes
 router.get("/profile/:id", verifyToken, getUser);
