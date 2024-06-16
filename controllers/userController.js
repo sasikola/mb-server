@@ -5,13 +5,23 @@ const fs = require("fs");
 
 const createBlog = async (req, res) => {
   try {
-    const { title, content, author } = req.body;
+    const { title, description, category } = req.body;
     const imagePaths = req.files?.map((file) => file.path);
 
-    // validation
-    if (!title || !content || !author) {
+    // Validation
+    if (!title || !description || !category || !imagePaths) {
       return res.status(400).json({ message: "All fields are required" });
     }
+
+    // Check image size
+    const imageSizes = imagePaths.map((path) => fs.statSync(path).size);
+    if (imageSizes.some((size) => size > 1000000)) {
+      return res
+        .status(400)
+        .json({ message: "Image size should be less than 1MB" });
+    }
+
+    // Check number of images
     if (imagePaths.length === 0) {
       return res
         .status(400)
@@ -21,22 +31,37 @@ const createBlog = async (req, res) => {
       return res.status(400).json({ message: "Only 5 images are allowed" });
     }
 
+    // Check if blog with same title already exists
     const existingBlog = await Blog.findOne({ title });
     if (existingBlog) {
       return res.status(400).json({
         message:
-          "Already one blog is there with this title, Please try with another title.",
+          "A blog with this title already exists. Please use another title.",
       });
     }
 
+    // Create new blog
     const newBlog = new Blog({
       title,
-      content,
-      author,
+      description,
+      category,
       images: imagePaths,
+      author: req.user._id,
     });
-
     await newBlog.save();
+
+    // Update user's post count
+    let user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.posts) {
+      user.posts = []; // Initialize posts as an empty array if undefined
+    }
+    user.posts.push(newBlog._id); // Assuming newBlog._id is the ObjectId of the newly created blog
+    await user.save();
+
     res
       .status(201)
       .json({ message: "Blog post created successfully.", blog: newBlog });
@@ -47,7 +72,6 @@ const createBlog = async (req, res) => {
 };
 
 // to fetch all blogs
-
 const getAllBlogs = async (req, res) => {
   try {
     const blogs = await Blog.find();
@@ -59,7 +83,6 @@ const getAllBlogs = async (req, res) => {
 };
 
 // to delete blog
-
 const deleteBlog = async (req, res) => {
   try {
     const { id } = req.params;
@@ -76,7 +99,6 @@ const deleteBlog = async (req, res) => {
 };
 
 // to get single blog
-
 const getSingleBlog = async (req, res) => {
   try {
     const { id } = req.params;
@@ -92,7 +114,6 @@ const getSingleBlog = async (req, res) => {
 };
 
 // to update the blog
-
 const updateBlog = async (req, res) => {
   try {
     const { id } = req.params;
@@ -122,6 +143,10 @@ const updateBlog = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+//
+
+// ---------------USER ROUTES------------------//
 
 // to get user profile
 const getUser = async (req, res) => {
