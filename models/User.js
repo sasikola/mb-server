@@ -23,12 +23,10 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
-  posts: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Post",
-    },
-  ],
+  posts: {
+    type: Number,
+    default: 0,
+  },
   userType: {
     type: String,
     required: [true, "User type is required"],

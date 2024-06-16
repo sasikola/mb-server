@@ -51,15 +51,11 @@ const createBlog = async (req, res) => {
     await newBlog.save();
 
     // Update user's post count
-    let user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    if (!user.posts) {
-      user.posts = []; // Initialize posts as an empty array if undefined
-    }
-    user.posts.push(newBlog._id); // Assuming newBlog._id is the ObjectId of the newly created blog
+    user.posts += 1; // Increment the posts count
     await user.save();
 
     res
@@ -70,6 +66,7 @@ const createBlog = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 // to fetch all blogs
 const getAllBlogs = async (req, res) => {
