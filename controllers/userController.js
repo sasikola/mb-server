@@ -2,6 +2,7 @@ const Blog = require("../models/Blog");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
+const path = require("path");
 
 const createBlog = async (req, res) => {
   try {
@@ -96,6 +97,15 @@ const deleteBlog = async (req, res) => {
         .status(403)
         .json({ message: "You are not authorized to delete this blog" });
     }
+
+    // Delete the images associated with the blog
+    blog.images.forEach((imagePath) => {
+      fs.unlink(path.resolve(imagePath), (err) => {
+        if (err) {
+          console.error(`Failed to delete image at path: ${imagePath}`, err);
+        }
+      });
+    });
 
     // Delete the blog
     await blog.deleteOne();
