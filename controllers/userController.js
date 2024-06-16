@@ -1,5 +1,6 @@
 const Blog = require("../models/Blog");
 const User = require("../models/User");
+const bcrypt = require("bcrypt")
 
 const createBlog = async (req, res) => {
   try {
@@ -158,6 +159,21 @@ const changeProfilePicture = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
+    // to update the user details
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (user.profilePicture) {
+      fs.unlink(user.profilePicture, (err) => {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log("Previous profile picture deleted successfully");
+        }
+      });
+    }
+
     // Process the uploaded file
     const imagePath = req.file.path;
     console.log("Uploaded image path:", imagePath);
@@ -182,6 +198,43 @@ const changeProfilePicture = async (req, res) => {
   }
 };
 
+// to update the user details
+
+const updateUser = async (req, res) => {
+  const { fullName, email, currentPassword, newPassword } = req.body;
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const emailExist = await User.findOne({ email: email });
+    if (emailExist && emailExist._id != req.user._id) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
+    // compare the current password and the user password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect current password" });
+    }
+
+    // Password hashing
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // to update the user details
+    user.fullName = fullName;
+    user.email = email;
+    user.password = hashedPassword;
+
+    await user.save();
+    res.status(200).json({ message: "User details updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   createBlog,
   getAllBlogs,
@@ -191,4 +244,5 @@ module.exports = {
   getUser,
   getAllAuthors,
   changeProfilePicture,
+  updateUser,
 };
