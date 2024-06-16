@@ -82,9 +82,29 @@ const getAllBlogs = async (req, res) => {
 const deleteBlog = async (req, res) => {
   try {
     const { id } = req.params;
-    const blog = await Blog.findByIdAndDelete(id);
+    const userId = req.user._id;
+
+    // Find the blog by id
+    const blog = await Blog.findById(id);
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
+    }
+
+    // Check if the logged-in user is the author of the blog
+    if (blog.author.toString() !== userId.toString()) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to delete this blog" });
+    }
+
+    // Delete the blog
+    await blog.deleteOne();
+
+    // Find the user who authored the blog and decrement their post count
+    const user = await User.findById(userId);
+    if (user) {
+      user.posts -= 1; // Decrement the posts count
+      await user.save();
     }
 
     res.status(200).json({ message: "Blog deleted successfully" });
