@@ -6,7 +6,8 @@ const generateToken = require("../middleware/generateToken");
 
 userRegister = async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, password } = req.body;
+    const { firstName, lastName, email, phone, password, profilePicture } =
+      req.body;
 
     // Validate required fields
     if (!firstName || !lastName || !email || !phone || !password) {
@@ -42,6 +43,7 @@ userRegister = async (req, res) => {
       email,
       phone,
       password: hashedPassword,
+      profilePicture,
     });
 
     // Save user to database
@@ -68,7 +70,7 @@ userRegister = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error!" });
+    res.status(500).json({ message: "Internal Server Error!" });
   }
 };
 
@@ -103,6 +105,7 @@ const userLogin = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         token: token,
+        profilePicture: user.profilePicture,
       },
     });
   } catch (error) {
