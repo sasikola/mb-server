@@ -71,7 +71,7 @@ const createBlog = async (req, res) => {
 // to fetch all blogs
 const getAllBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find();
+    const blogs = await Blog.find().populate("author", "firstName lastName"); // Populate author field with the firstName and lastName
     res.status(200).json(blogs);
   } catch (error) {
     console.error(error);
@@ -128,7 +128,10 @@ const deleteBlog = async (req, res) => {
 const getSingleBlog = async (req, res) => {
   try {
     const { id } = req.params;
-    const blog = await Blog.findById(id);
+    const blog = await Blog.findById(id).populate(
+      "author",
+      "firstName lastName"
+    ); // Populate author field with the firstName and lastName
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
     }
@@ -363,5 +366,5 @@ module.exports = {
   changeProfilePicture,
   updateUser,
   getPostsByCategory,
-  getUserPosts
+  getUserPosts,
 };

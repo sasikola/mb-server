@@ -1,7 +1,6 @@
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
 const verifyToken = require("../middleware/verifyToken");
 const {
   getAllBlogs,
@@ -17,20 +16,10 @@ const {
 } = require("../controllers/userController");
 
 const router = express.Router();
-
-// Utility function to ensure directory exists
-function ensureDirectoryExistence(directory) {
-  if (!fs.existsSync(directory)) {
-    fs.mkdirSync(directory, { recursive: true });
-  }
-}
-
-// Common storage configuration for both blogs and profile pictures
+// Multer configuration for blogs with multiple images
 const imageStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadPath = "uploads/images/";
-    ensureDirectoryExistence(uploadPath);
-    cb(null, uploadPath);
+    cb(null, "uploads/images/");
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -50,14 +39,14 @@ router.post(
 
 // Blog routes
 router.get("/blogs", getAllBlogs);
-router.get("/blog/:id", getSingleBlog);
-router.delete("/blog/delete/:id", verifyToken, deleteBlog);
-router.put("/blog/update/:id", verifyToken, updateBlog);
-router.get("/blog/categories/:category", getPostsByCategory);
-router.get("/blog/user/:id", getUserPosts);
+router.get("/blog/", getSingleBlog);
+router.delete("/blog/delete/", verifyToken, deleteBlog);
+router.put("/blog/update/", verifyToken, updateBlog);
+router.get("/blog/categories/", getPostsByCategory);
+router.get("/blog/user/", getUserPosts);
 
 // User Routes
-router.get("/profile/:id", verifyToken, getUser);
+router.get("/profile/", verifyToken, getUser);
 router.get("/authors", getAllAuthors);
 
 // Route to upload profile picture
