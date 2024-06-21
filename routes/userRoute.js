@@ -39,11 +39,11 @@ router.post(
 
 // Blog routes
 router.get("/blogs", getAllBlogs);
-router.get("/blog/", getSingleBlog);
-router.delete("/blog/delete/", verifyToken, deleteBlog);
-router.put("/blog/update/", verifyToken, updateBlog);
-router.get("/blog/categories/", getPostsByCategory);
-router.get("/blog/user/", getUserPosts);
+router.get("/blog/:id", getSingleBlog);
+router.delete("/blog/delete/:id", verifyToken, deleteBlog);
+router.put("/blog/update/:id", verifyToken, updateBlog);
+router.get("/blog/categories/:id", getPostsByCategory);
+router.get("/blog/user/:id", getUserPosts);
 
 // User Routes
 router.get("/profile/", verifyToken, getUser);
