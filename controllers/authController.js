@@ -3,7 +3,6 @@ const User = require("../models/User");
 const generateToken = require("../middleware/generateToken");
 
 // this is User Register
-
 userRegister = async (req, res) => {
   try {
     const { firstName, lastName, email, phone, password, profilePicture } =
@@ -74,6 +73,7 @@ userRegister = async (req, res) => {
   }
 };
 
+// this is for user login
 const userLogin = async (req, res) => {
   try {
     const { phone, password } = req.body;
@@ -113,6 +113,7 @@ const userLogin = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error!" });
   }
 };
+
 
 const adminLogin = async (req, res) => {
   const { phone, password } = req.body;

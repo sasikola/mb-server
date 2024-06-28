@@ -9,7 +9,8 @@ const initializeAdmin = async () => {
       const hashedPassword = await bcrypt.hash("adminPassword", salt); // Replace 'admin_password' with your desired admin password
 
       const admin = new User({
-        name: "Admin",
+        firstName: "Sasi",
+        lastName:"Kiran (Admin)",
         email: "admin@example.com",
         phone: "1234567890", // Replace with admin phone number
         password: hashedPassword,
