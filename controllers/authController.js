@@ -114,7 +114,6 @@ const userLogin = async (req, res) => {
   }
 };
 
-
 const adminLogin = async (req, res) => {
   const { phone, password } = req.body;
 
